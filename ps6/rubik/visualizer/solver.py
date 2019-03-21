@@ -19,7 +19,7 @@ class Graph:
     def adj(u, dir):
         adj_u = []
         for move in rubik.quarter_twists:
-                adj_u.append(rubik.perm_apply(move, u))
+            adj_u.append(rubik.perm_apply(move, u))
         return adj_u
 
 
@@ -40,19 +40,28 @@ def find_minimal_d(front, f_q, back, b_q):
     return best_node       
     
 def get_solution_path(front, back, best_node, s, end):
-    solution = []
+    solution_front = []
+    solution_back =[] 
     FORWARD = 1
     BACKWARD = 0
     v = best_node
+    print("Front Moves: ")
     while(v!=s):
-        solution.append(find_move(front.parent[v], v, FORWARD))
+        solution_front.append(find_move(front.parent[v], v, FORWARD))
         v = front.parent[v]
+    solution_front.reverse()
+    # for move in solution_front: 
+    #     print(rubik.quarter_twists_names[move])
     v = best_node
     while(v!=end):
-        solution.append(find_move(back.parent[v], v, BACKWARD))
+        solution_back.append(find_move(back.parent[v], v, BACKWARD))
         v = back.parent[v]
-    for move in solution: 
-        print(rubik.quarter_twists_names[move])
+    print("Back Moves:")
+    # for move in solution_back: 
+    #     print(rubik.quarter_twists_names[move])
+    solution = solution_front + solution_back
+    #solution.reverse()
+    # print(solution)
     return solution
 
 def print_path(r, s, v):
@@ -108,8 +117,11 @@ def bfs(s, e):
 
 if __name__ == '__main__':
     start = rubik.I
-    middle = rubik.perm_apply(rubik.F, start)
-    end = rubik.perm_apply(rubik.Li, middle)
+    middle = rubik.perm_apply(rubik.U, start)
+    middle2 = rubik.perm_apply(rubik.L, middle)
+    middle3 = rubik.perm_apply(rubik.F, middle2)
+    middle4 = rubik.perm_apply(rubik.Li,middle3)
+    end = rubik.perm_apply(rubik.U, middle4)
     (front, f_q, back, b_q) = bfs(start, end)
     best_node = find_minimal_d(front, f_q, back, b_q)
     solution  = get_solution_path(front, back, best_node, start, end)
