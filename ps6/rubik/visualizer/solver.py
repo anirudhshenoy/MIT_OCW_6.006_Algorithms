@@ -8,7 +8,9 @@ def shortest_path(start, end):
     end_position. Returns a list of moves. 
     Assumes the rubik.quarter_twists move set.
     """
-    
+    (front, f_q, back, b_q) = bfs(start, end)
+    best_node = find_minimal_d(front, f_q, back, b_q)
+    solution  = get_solution_path(front, back, best_node, start, end)
     return solution 
 
 
@@ -17,10 +19,7 @@ class Graph:
     def adj(u, dir):
         adj_u = []
         for move in rubik.quarter_twists:
-            if(dir == 'front'):
                 adj_u.append(rubik.perm_apply(move, u))
-            else:
-                adj_u.append(rubik.perm_apply(rubik.perm_inverse(move),u))
         return adj_u
 
 
@@ -42,15 +41,15 @@ def find_minimal_d(front, f_q, back, b_q):
     
 def get_solution_path(front, back, best_node, s, end):
     solution = []
+    FORWARD = 1
+    BACKWARD = 0
     v = best_node
     while(v!=s):
-        print('v', v)
-        print('s' ,s)
-        solution.append(find_move(front.parent[v], v))
+        solution.append(find_move(front.parent[v], v, FORWARD))
         v = front.parent[v]
     v = best_node
     while(v!=end):
-        solution.append(find_move(back.parent[v], v))
+        solution.append(find_move(back.parent[v], v, BACKWARD))
         v = back.parent[v]
     for move in solution: 
         print(rubik.quarter_twists_names[move])
@@ -66,10 +65,14 @@ def print_path(r, s, v):
         print_path(r, s, r.parent[v])
 
 
-def find_move(u, v):
+def find_move(u, v, dir):
     for move in rubik.quarter_twists:
-        if v == rubik.perm_apply(move, u):
-            return move
+        if(dir):
+            if v == rubik.perm_apply(move, u):
+                return move
+        else:
+            if v == rubik.perm_apply(rubik.perm_inverse(move), u):
+                return move
     return -1
 
 
@@ -85,17 +88,15 @@ def bfs(s, e):
     e_queue = deque()
     e_queue.append(e)
     while True:
-        print("loop")
-         
+        for node in s_queue:
+            if(node in e_queue):
+                return (front, s_queue, back, e_queue) 
         u = s_queue.popleft()
         for n in Graph.adj(u, 'front'):
             if n not in front.level:
                 front.parent[n] = u
                 front.level[n] = front.level[u] + 1
                 s_queue.append(n)
-        for node in s_queue:
-            if(node in e_queue):
-                return (front, s_queue, back, e_queue) 
         v = e_queue.popleft()
         for m in Graph.adj(v, 'back'):
             if m not in back.level:
@@ -108,7 +109,7 @@ def bfs(s, e):
 if __name__ == '__main__':
     start = rubik.I
     middle = rubik.perm_apply(rubik.F, start)
-    end = rubik.perm_apply(rubik.F, middle)
+    end = rubik.perm_apply(rubik.Li, middle)
     (front, f_q, back, b_q) = bfs(start, end)
     best_node = find_minimal_d(front, f_q, back, b_q)
     solution  = get_solution_path(front, back, best_node, start, end)
