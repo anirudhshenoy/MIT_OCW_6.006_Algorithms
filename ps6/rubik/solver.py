@@ -19,7 +19,10 @@ class Graph:
     def adj(u, dir):
         adj_u = []
         for move in rubik.quarter_twists:
+            if(dir):
                 adj_u.append(rubik.perm_apply(move, u))
+            else:
+                adj_u.append(rubik.perm_apply(rubik.perm_inverse(move), u))
         return adj_u
 
 
@@ -92,7 +95,7 @@ def bfs(s, e):
             if(node in e_queue):
                 return (front, s_queue, back, e_queue) 
         u = s_queue.popleft()
-        for n in Graph.adj(u, 'front'):
+        for n in Graph.adj(u, 1):
             if n not in front.level:
                 front.parent[n] = u
                 front.level[n] = front.level[u] + 1
